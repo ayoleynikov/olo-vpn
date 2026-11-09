@@ -105,17 +105,27 @@ enum LinkParser {
         }
         let port = components.port ?? 443
         let name = decodeName(components.fragment ?? "VLESS")
-        let sni = components.queryItems?.first(where: { $0.name == "sni" })?.value ?? host
-        let transport = components.queryItems?.first(where: { $0.name == "type" })?.value ?? "tcp"
+        let q: (String) -> String? = { key in
+            components.queryItems?.first(where: { $0.name == key })?.value
+        }
         return VPNServer(
             name: name,
             proto: .vless,
             host: host,
             port: port,
             uuid: uuid,
-            sni: sni,
-            transport: transport,
-            rawLink: link
+            sni: q("sni") ?? host,
+            transport: q("type") ?? "tcp",
+            rawLink: link,
+            security: q("security") ?? "",
+            flow: q("flow") ?? "",
+            fingerprint: q("fp") ?? "",
+            publicKey: q("pbk") ?? "",
+            shortID: q("sid") ?? "",
+            spiderX: q("spx") ?? "",
+            wsPath: q("path") ?? "/",
+            wsHost: q("host") ?? "",
+            grpcServiceName: q("serviceName") ?? "GunService"
         )
     }
 
@@ -167,7 +177,9 @@ enum LinkParser {
             port: port,
             password: password,
             sni: query(url, "sni") ?? host,
-            rawLink: link
+            rawLink: link,
+            hy2Obfs: query(url, "obfs") ?? "",
+            hy2ObfsPassword: query(url, "obfs-password") ?? query(url, "obfs_password") ?? ""
         )
     }
 

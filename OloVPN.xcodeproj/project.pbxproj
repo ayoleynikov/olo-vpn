@@ -34,6 +34,7 @@
 		50B3ACEDE8751874005709DC /* Extension+RunBlocking.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14A14FFF76A6D251FCB8FD65 /* Extension+RunBlocking.swift */; };
 		50F7B0D332C2A73C8654193C /* AppConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7190DAD78EDD28D037F5118D /* AppConstants.swift */; };
 		5172641987DC4F4B7D75C167 /* Extension+RunBlocking.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14A14FFF76A6D251FCB8FD65 /* Extension+RunBlocking.swift */; };
+		55D2ADA47D2FBC06BD31D690 /* KeychainStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8057FD50EB558AF97B78F306 /* KeychainStore.swift */; };
 		580AC84E15E5785C0012F053 /* ManualServerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9897B60F88F8804380AD418 /* ManualServerView.swift */; };
 		58976A1EA59FD0C1EDBA8679 /* MonitorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D476F51F66428AF796E27C4 /* MonitorView.swift */; };
 		5A376F817442DD7AF033518C /* BigButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = CFCEC9D355C2C7853DBB5D7E /* BigButton.swift */; };
@@ -42,6 +43,7 @@
 		5C23C7F359BB4AF158670492 /* ExtensionPlatformInterface.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEC314509586AA4BF3E3E06C /* ExtensionPlatformInterface.swift */; };
 		5C4C79AC091CCE095F3548D5 /* SubscriptionImporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6138DA5BE6F8A864D540DAB6 /* SubscriptionImporter.swift */; };
 		5FAA98750A3468AB26DFAC9F /* PasteLinkView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF03A6C6028EC26DA11FD919 /* PasteLinkView.swift */; };
+		609AF03294758B95F23CFC9E /* KeychainStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8057FD50EB558AF97B78F306 /* KeychainStore.swift */; };
 		66472702F41FA9EB1ED33B21 /* SubscriptionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35620ABEB31DA9FCE12609D0 /* SubscriptionView.swift */; };
 		7782DA067379362C90C98BF1 /* VPNServer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 433D069441A766FC2E36F169 /* VPNServer.swift */; };
 		7A3EAAEECACC51CA7F948D44 /* ExtensionProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 858E1598470B7CC4620DE628 /* ExtensionProvider.swift */; };
@@ -142,7 +144,7 @@
 		20DFDEAE5F45A16D6F282106 /* PacketTunnel.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = PacketTunnel.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		211206672FE883CE47069DD1 /* Libbox.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = Libbox.xcframework; path = Vendor/Libbox.xcframework; sourceTree = "<group>"; };
 		28F67D46EEC4A2606489964B /* NetworkExtension.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = NetworkExtension.framework; path = System/Library/Frameworks/NetworkExtension.framework; sourceTree = SDKROOT; };
-		2FEFF1508FF4C5E7520452CF /* PacketTunnel-iOS.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "PacketTunnel-iOS.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
+		2FEFF1508FF4C5E7520452CF /* PacketTunnel-iOS.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = "PacketTunnel-iOS.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
 		35620ABEB31DA9FCE12609D0 /* SubscriptionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscriptionView.swift; sourceTree = "<group>"; };
 		35A89B5E8AF9850AA4DA2150 /* LinkParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinkParser.swift; sourceTree = "<group>"; };
 		389F5512196895DB20D50F24 /* TrafficModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrafficModels.swift; sourceTree = "<group>"; };
@@ -158,6 +160,7 @@
 		7190DAD78EDD28D037F5118D /* AppConstants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppConstants.swift; sourceTree = "<group>"; };
 		79B8FD16E801F2391242F9C4 /* TunnelManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TunnelManager.swift; sourceTree = "<group>"; };
 		7D0DB57F9B1CCA21FE25BA89 /* ProtectView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProtectView.swift; sourceTree = "<group>"; };
+		8057FD50EB558AF97B78F306 /* KeychainStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainStore.swift; sourceTree = "<group>"; };
 		83705DE8F3EC5EF8D16B35F4 /* OloVPN.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = OloVPN.entitlements; sourceTree = "<group>"; };
 		858E1598470B7CC4620DE628 /* ExtensionProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExtensionProvider.swift; sourceTree = "<group>"; };
 		86AC14745DFD9DB37BCC5835 /* Network.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Network.framework; path = System/Library/Frameworks/Network.framework; sourceTree = SDKROOT; };
@@ -176,7 +179,7 @@
 		C13B57F8004474B1F92E047B /* QRImportView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRImportView.swift; sourceTree = "<group>"; };
 		CFCEC9D355C2C7853DBB5D7E /* BigButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BigButton.swift; sourceTree = "<group>"; };
 		D1AFEE398B27BB0C51426065 /* PingService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PingService.swift; sourceTree = "<group>"; };
-		D48AB0BC2FF0A2C314745B20 /* OloVPN-iOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "OloVPN-iOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		D48AB0BC2FF0A2C314745B20 /* OloVPN-iOS.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = "OloVPN-iOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		DB5F0A162B3DC7564CF5D01C /* IPCheckService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IPCheckService.swift; sourceTree = "<group>"; };
 		DEC314509586AA4BF3E3E06C /* ExtensionPlatformInterface.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExtensionPlatformInterface.swift; sourceTree = "<group>"; };
 		E66A4E58026FBE1B193B3EF8 /* libresolv.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libresolv.tbd; path = usr/lib/libresolv.tbd; sourceTree = SDKROOT; };
@@ -316,6 +319,7 @@
 			children = (
 				EFC28454706B962A6102F259 /* ConfigStore.swift */,
 				DB5F0A162B3DC7564CF5D01C /* IPCheckService.swift */,
+				8057FD50EB558AF97B78F306 /* KeychainStore.swift */,
 				35A89B5E8AF9850AA4DA2150 /* LinkParser.swift */,
 				D1AFEE398B27BB0C51426065 /* PingService.swift */,
 				B76C3CF6CA269356D0E17381 /* SingBoxConfigBuilder.swift */,
@@ -462,7 +466,7 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
-				LastUpgradeCheck = 2720;
+				LastUpgradeCheck = 1430;
 				TargetAttributes = {
 					74E00F9B627CA3FCF122B338 = {
 						ProvisioningStyle = Automatic;
@@ -563,6 +567,7 @@
 				BE2EDEBDB43B703257C5C933 /* ConnectOrb.swift in Sources */,
 				E29DFE91DE3F77100DC8F0A9 /* HomeView.swift in Sources */,
 				D22D64D8293D540C087437AD /* IPCheckService.swift in Sources */,
+				55D2ADA47D2FBC06BD31D690 /* KeychainStore.swift in Sources */,
 				DCA77C1A74E180EC67FF2B06 /* LinkParser.swift in Sources */,
 				580AC84E15E5785C0012F053 /* ManualServerView.swift in Sources */,
 				5B7E99EED318A400E951C14E /* MonitorView.swift in Sources */,
@@ -596,6 +601,7 @@
 				B6F4FA72ED3579002065CB3E /* ConnectOrb.swift in Sources */,
 				1FB49E2B67683DB4B4AC0873 /* HomeView.swift in Sources */,
 				B55041CBB68C0891A2995C51 /* IPCheckService.swift in Sources */,
+				609AF03294758B95F23CFC9E /* KeychainStore.swift in Sources */,
 				E041B57D5FEF2305ED71C3FF /* LinkParser.swift in Sources */,
 				F2151C40EFF4385FB17CF48E /* ManualServerView.swift in Sources */,
 				58976A1EA59FD0C1EDBA8679 /* MonitorView.swift in Sources */,
@@ -640,26 +646,16 @@
 				CODE_SIGN_ENTITLEMENTS = PacketTunnel/PacketTunnel.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				DEAD_CODE_STRIPPING = YES;
-				DEVELOPMENT_TEAM = 93XUNMSYBR;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"Vendor\"",
 				);
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = PacketTunnel/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/../Frameworks",
-					"@executable_path/../../../../Frameworks",
-				);
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @executable_path/../../../../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				OTHER_LDFLAGS = (
-					"$(inherited)",
-					"-lresolv",
-				);
+				OTHER_LDFLAGS = "$(inherited) -lresolv";
 				PRODUCT_BUNDLE_IDENTIFIER = app.olo.vpn.PacketTunnel;
-				REGISTER_APP_GROUPS = YES;
 				SDKROOT = macosx;
 				SKIP_INSTALL = YES;
 			};
@@ -672,20 +668,14 @@
 				CODE_SIGN_ENTITLEMENTS = OloVPN/OloVPN.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				DEAD_CODE_STRIPPING = YES;
-				DEVELOPMENT_TEAM = 93XUNMSYBR;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = Olo;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				INFOPLIST_KEY_NSCameraUsageDescription = "Olo сканирует QR‑коды серверов VPN";
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/../Frameworks",
-				);
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
 				PRODUCT_BUNDLE_IDENTIFIER = app.olo.vpn;
-				REGISTER_APP_GROUPS = YES;
 				SDKROOT = macosx;
 			};
 			name = Debug;
@@ -696,26 +686,16 @@
 				CODE_SIGN_ENTITLEMENTS = PacketTunnel/PacketTunnel.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				DEAD_CODE_STRIPPING = YES;
-				DEVELOPMENT_TEAM = 93XUNMSYBR;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"Vendor\"",
 				);
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = PacketTunnel/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/../Frameworks",
-					"@executable_path/../../../../Frameworks",
-				);
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @executable_path/../../../../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				OTHER_LDFLAGS = (
-					"$(inherited)",
-					"-lresolv",
-				);
+				OTHER_LDFLAGS = "$(inherited) -lresolv";
 				PRODUCT_BUNDLE_IDENTIFIER = app.olo.vpn.PacketTunnel;
-				REGISTER_APP_GROUPS = YES;
 				SDKROOT = macosx;
 				SKIP_INSTALL = YES;
 			};
@@ -756,11 +736,9 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
 				CURRENT_PROJECT_VERSION = 1;
-				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
-				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
@@ -782,7 +760,6 @@
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
@@ -801,15 +778,8 @@
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = PacketTunnel/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@executable_path/../../Frameworks",
-				);
-				OTHER_LDFLAGS = (
-					"$(inherited)",
-					"-lresolv",
-				);
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
+				OTHER_LDFLAGS = "$(inherited) -lresolv";
 				PRODUCT_BUNDLE_IDENTIFIER = app.olo.vpn.PacketTunnel;
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
@@ -824,20 +794,14 @@
 				CODE_SIGN_ENTITLEMENTS = OloVPN/OloVPN.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				DEAD_CODE_STRIPPING = YES;
-				DEVELOPMENT_TEAM = 93XUNMSYBR;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = Olo;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				INFOPLIST_KEY_NSCameraUsageDescription = "Olo сканирует QR‑коды серверов VPN";
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/../Frameworks",
-				);
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
 				PRODUCT_BUNDLE_IDENTIFIER = app.olo.vpn;
-				REGISTER_APP_GROUPS = YES;
 				SDKROOT = macosx;
 			};
 			name = Release;
@@ -923,11 +887,9 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
 				CURRENT_PROJECT_VERSION = 1;
-				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
@@ -942,7 +904,6 @@
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				SWIFT_VERSION = 5.0;
@@ -961,15 +922,8 @@
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = PacketTunnel/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@executable_path/../../Frameworks",
-				);
-				OTHER_LDFLAGS = (
-					"$(inherited)",
-					"-lresolv",
-				);
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
+				OTHER_LDFLAGS = "$(inherited) -lresolv";
 				PRODUCT_BUNDLE_IDENTIFIER = app.olo.vpn.PacketTunnel;
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;

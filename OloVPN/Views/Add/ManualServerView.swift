@@ -18,6 +18,14 @@ struct ManualServerView: View {
     @State private var method = "aes-256-gcm"
     @State private var sni = ""
     @State private var transport = "tcp"
+    @State private var security = ""
+    @State private var flow = ""
+    @State private var fingerprint = ""
+    @State private var publicKey = ""
+    @State private var shortID = ""
+    @State private var wsPath = "/"
+    @State private var hy2Obfs = ""
+    @State private var hy2ObfsPassword = ""
     @State private var errorText: String?
     @State private var autoHint: String?
     @State private var detectedFromLink = false
@@ -181,13 +189,26 @@ struct ManualServerView: View {
         case .shadowsocks:
             field("Пароль", text: $password, placeholder: "секрет")
             field("Метод", text: $method, placeholder: "aes-256-gcm")
-        case .trojan, .hysteria2:
+        case .trojan:
             field("Пароль", text: $password, placeholder: "секрет")
             field("SNI", text: $sni, placeholder: "как в сертификате")
+        case .hysteria2:
+            field("Пароль", text: $password, placeholder: "секрет")
+            field("SNI", text: $sni, placeholder: "как в сертификате")
+            field("Obfs", text: $hy2Obfs, placeholder: "salamander / пусто")
+            field("Obfs password", text: $hy2ObfsPassword, placeholder: "если есть")
         case .vless, .vmess:
             field("UUID", text: $uuid, placeholder: "xxxxxxxx-xxxx-…")
             field("Транспорт", text: $transport, placeholder: "tcp / ws / grpc")
             field("SNI", text: $sni, placeholder: "опционально")
+            field("Security", text: $security, placeholder: "reality / tls")
+            field("Flow", text: $flow, placeholder: "xtls-rprx-vision")
+            field("Fingerprint", text: $fingerprint, placeholder: "chrome / firefox")
+            field("Reality public key", text: $publicKey, placeholder: "pbk")
+            field("Short ID", text: $shortID, placeholder: "sid")
+            if transport.lowercased().contains("ws") {
+                field("WS path", text: $wsPath, placeholder: "/")
+            }
         case .tuic:
             field("UUID", text: $uuid, placeholder: "uuid")
             field("Пароль", text: $password, placeholder: "пароль")
@@ -270,6 +291,14 @@ struct ManualServerView: View {
                 method = server.method.isEmpty ? method : server.method
                 sni = server.sni
                 transport = server.transport.isEmpty ? transport : server.transport
+                security = server.security
+                flow = server.flow
+                fingerprint = server.fingerprint
+                publicKey = server.publicKey
+                shortID = server.shortID
+                wsPath = server.wsPath
+                hy2Obfs = server.hy2Obfs
+                hy2ObfsPassword = server.hy2ObfsPassword
                 detectedFromLink = true
                 autoHint = "Определён: \(server.proto.title)"
                 errorText = nil
@@ -312,7 +341,15 @@ struct ManualServerView: View {
             uuid: uuid,
             method: method,
             sni: sni.isEmpty ? trimmedHost : sni,
-            transport: transport
+            transport: transport,
+            security: security,
+            flow: flow,
+            fingerprint: fingerprint,
+            publicKey: publicKey,
+            shortID: shortID,
+            wsPath: wsPath,
+            hy2Obfs: hy2Obfs,
+            hy2ObfsPassword: hy2ObfsPassword
         )
         onSave(server)
     }

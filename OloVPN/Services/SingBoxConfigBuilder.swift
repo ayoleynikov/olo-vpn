@@ -33,12 +33,18 @@ enum SingBoxConfigBuilder {
             outbound["server_port"] = server.port
             outbound["password"] = server.password
             outbound["tls"] = tlsObject(server)
+            if needsTransport(server) {
+                outbound["transport"] = transportObject(server)
+            }
         case .vless:
             outbound["server"] = server.host
             outbound["server_port"] = server.port
             outbound["uuid"] = server.uuid
             outbound["packet_encoding"] = "xudp"
-            if !server.transport.isEmpty && server.transport != "tcp" {
+            if !server.flow.isEmpty {
+                outbound["flow"] = server.flow
+            }
+            if needsTransport(server) {
                 outbound["transport"] = transportObject(server)
             }
             outbound["tls"] = tlsObject(server)
@@ -47,14 +53,22 @@ enum SingBoxConfigBuilder {
             outbound["server_port"] = server.port
             outbound["uuid"] = server.uuid
             outbound["security"] = server.method.isEmpty ? "auto" : server.method
-            if !server.transport.isEmpty && server.transport != "tcp" {
+            if needsTransport(server) {
                 outbound["transport"] = transportObject(server)
             }
-            outbound["tls"] = tlsObject(server)
+            if !server.security.isEmpty || !server.sni.isEmpty {
+                outbound["tls"] = tlsObject(server)
+            }
         case .hysteria2:
             outbound["server"] = server.host
             outbound["server_port"] = server.port
-            outbound["password"] = server.password
+            outbound["password"] = server.password.isEmpty ? server.uuid : server.password
+            if !server.hy2Obfs.isEmpty {
+                outbound["obfs"] = [
+                    "type": server.hy2Obfs,
+                    "password": server.hy2ObfsPassword
+                ]
+            }
             outbound["tls"] = tlsObject(server)
         case .tuic:
             outbound["server"] = server.host
@@ -66,21 +80,13 @@ enum SingBoxConfigBuilder {
         case .socks:
             outbound["server"] = server.host
             outbound["server_port"] = server.port
-            if !server.uuid.isEmpty {
-                outbound["username"] = server.uuid
-            }
-            if !server.password.isEmpty {
-                outbound["password"] = server.password
-            }
+            if !server.uuid.isEmpty { outbound["username"] = server.uuid }
+            if !server.password.isEmpty { outbound["password"] = server.password }
         case .http:
             outbound["server"] = server.host
             outbound["server_port"] = server.port
-            if !server.uuid.isEmpty {
-                outbound["username"] = server.uuid
-            }
-            if !server.password.isEmpty {
-                outbound["password"] = server.password
-            }
+            if !server.uuid.isEmpty { outbound["username"] = server.uuid }
+            if !server.password.isEmpty { outbound["password"] = server.password }
         case .wireguard:
             outbound["server"] = server.host
             outbound["server_port"] = server.port
@@ -90,20 +96,12 @@ enum SingBoxConfigBuilder {
         }
 
         var routeRules: [[String: Any]] = [
-            [
-                "action": "sniff"
-            ],
-            [
-                "protocol": ["dns"],
-                "action": "hijack-dns"
-            ]
+            ["action": "sniff"],
+            ["protocol": ["dns"], "action": "hijack-dns"]
         ]
 
         if protection.allowLAN {
-            routeRules.append([
-                "ip_is_private": true,
-                "outbound": "direct"
-            ])
+            routeRules.append(["ip_is_private": true, "outbound": "direct"])
         }
 
         let localDirect = routeMode == .smart && localPolicy == .bypass
@@ -111,43 +109,10 @@ enum SingBoxConfigBuilder {
             routeRules.append(contentsOf: localRules(for: localRegion))
         }
 
-        routeRules.append([
-            "action": "route",
-            "outbound": routeMode == .global || localPolicy == .throughVPN || !localDirect ? "proxy" : "proxy"
-        ])
+        let inet4Address = ["172.19.0.1/30"]
+        let inet6Address = protection.blockIPv6 ? [] : ["fdfe:dcba:9876::1/126"]
 
-        // Final default
-        let finalOutbound = "proxy"
-
-        var dnsServers: [[String: Any]] = []
-        if protection.dnsThroughVPN {
-            dnsServers.append([
-                "tag": "remote",
-                "type": "tls",
-                "server": "1.1.1.1",
-                "detour": "proxy"
-            ])
-            dnsServers.append([
-                "tag": "local",
-                "type": "udp",
-                "server": "8.8.8.8",
-                "detour": "direct"
-            ])
-        } else {
-            dnsServers.append([
-                "tag": "local",
-                "type": "udp",
-                "server": "8.8.8.8"
-            ])
-        }
-
-        var inet4Address = ["172.19.0.1/30"]
-        var inet6Address: [String] = []
-        if !protection.blockIPv6 {
-            inet6Address = ["fdfe:dcba:9876::1/126"]
-        }
-
-        var tun: [String: Any] = [
+        let tun: [String: Any] = [
             "type": "tun",
             "tag": "tun-in",
             "mtu": 9000,
@@ -156,16 +121,19 @@ enum SingBoxConfigBuilder {
             "strict_route": protection.killSwitch,
             "stack": "system"
         ]
-        if protection.blockIPv6 {
-            // Keep IPv6 off the tunnel path; OS still may need exclude.
-            tun["address"] = inet4Address
+
+        var dnsServers: [[String: Any]] = []
+        if protection.dnsThroughVPN {
+            dnsServers = [
+                ["tag": "remote", "type": "tls", "server": "1.1.1.1", "detour": "proxy"],
+                ["tag": "local", "type": "udp", "server": "8.8.8.8", "detour": "direct"]
+            ]
+        } else {
+            dnsServers = [["tag": "local", "type": "udp", "server": "8.8.8.8"]]
         }
 
         let config: [String: Any] = [
-            "log": [
-                "level": "info",
-                "timestamp": true
-            ],
+            "log": ["level": "info", "timestamp": true],
             "dns": [
                 "servers": dnsServers,
                 "strategy": protection.blockIPv6 ? "ipv4_only" : "prefer_ipv4",
@@ -179,7 +147,7 @@ enum SingBoxConfigBuilder {
             ],
             "route": [
                 "rules": routeRules,
-                "final": finalOutbound,
+                "final": "proxy",
                 "auto_detect_interface": true
             ],
             "experimental": [
@@ -187,9 +155,7 @@ enum SingBoxConfigBuilder {
                     "external_controller": "127.0.0.1:9090",
                     "secret": AppConstants.clashSecret
                 ],
-                "cache_file": [
-                    "enabled": true
-                ]
+                "cache_file": ["enabled": true]
             ]
         ]
 
@@ -214,20 +180,46 @@ enum SingBoxConfigBuilder {
         }
     }
 
+    private static func needsTransport(_ server: VPNServer) -> Bool {
+        let t = server.transport.lowercased()
+        return !t.isEmpty && t != "tcp"
+    }
+
     private static func tlsObject(_ server: VPNServer) -> [String: Any] {
         var tls: [String: Any] = [
             "enabled": true,
             "server_name": server.sni.isEmpty ? server.host : server.sni
         ]
+        if !server.fingerprint.isEmpty {
+            tls["utls"] = ["enabled": true, "fingerprint": server.fingerprint]
+        }
+        let security = server.security.lowercased()
+        if security == "reality" || !server.publicKey.isEmpty {
+            var reality: [String: Any] = [
+                "enabled": true,
+                "public_key": server.publicKey
+            ]
+            if !server.shortID.isEmpty {
+                reality["short_id"] = [server.shortID]
+            }
+            tls["reality"] = reality
+        }
         return tls
     }
 
     private static func transportObject(_ server: VPNServer) -> [String: Any] {
         switch server.transport.lowercased() {
         case "ws", "websocket":
-            return ["type": "ws", "path": "/"]
+            var ws: [String: Any] = ["type": "ws", "path": server.wsPath.isEmpty ? "/" : server.wsPath]
+            if !server.wsHost.isEmpty {
+                ws["headers"] = ["Host": server.wsHost]
+            }
+            return ws
         case "grpc":
-            return ["type": "grpc", "service_name": "GunService"]
+            return [
+                "type": "grpc",
+                "service_name": server.grpcServiceName.isEmpty ? "GunService" : server.grpcServiceName
+            ]
         default:
             return ["type": server.transport]
         }
@@ -246,9 +238,7 @@ enum SingBoxConfigBuilder {
                 ["domain_keyword": ["baidu", "qq.com", "weixin", "alipay", "taobao"], "outbound": "direct"]
             ]
         case .other:
-            return [
-                ["ip_is_private": true, "outbound": "direct"]
-            ]
+            return [["ip_is_private": true, "outbound": "direct"]]
         }
     }
 }

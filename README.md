@@ -1,84 +1,103 @@
 # Olo
 
-**Открытый VPN‑клиент для iPhone и Mac** с крупным понятным интерфейсом.
+**Открытый VPN‑клиент** с крупным понятным интерфейсом (в духе Shadowrocket). Код Shadowrocket не используется.
 
-Идея как у Shadowrocket: вставил ссылку или подписку → сервер в списке → большая кнопка подключения. Код Shadowrocket не используется.
-
-Туннель: Apple **Network Extension** + движок **[sing-box / Libbox](https://github.com/SagerNet/sing-box)** (GPL‑3.0).
+Туннель на всех платформах: движок **[sing-box / Libbox](https://github.com/SagerNet/sing-box)** (GPL‑3.0).
 
 <p align="center">
   <img src="OloVPN/Resources/Assets.xcassets/AppIcon.appiconset/AppIcon-1024.png" width="128" alt="Olo icon" />
 </p>
 
-## Возможности
+## Матрица платформ
 
-| | |
-|---|---|
-| **Серверы** | Ссылка `ss://` · `vless://` · `trojan://` · `hy2://`, https‑подписки (Shadowrocket), QR, ручная форма с авто‑определением протокола |
-| **Маршрут** | Умный режим: местные сайты региона мимо VPN или через него; либо весь трафик в туннель |
-| **Защита IP** | Kill switch, DNS через VPN, блок IPv6, проверка «мой IP / страна», утечки |
-| **Монитор** | Лог подключений, текущий публичный IP, скорость, куда уходит трафик, графики |
-| **Удобства** | Пинг серверов, авто‑обновление подписок |
+| Платформа | UI | Туннель | Статус |
+|-----------|----|---------|--------|
+| **Apple** (iPhone / Mac) | SwiftUI | Network Extension + Libbox | UI + импорт готовы; P0: Reality/HY2, Keychain, честный статус NE |
+| **Android** | Kotlin + Jetpack Compose | `VpnService` + Libbox `.aar` | MVP scaffold: UI, парсеры, сервис, генератор JSON |
+| **Windows** | .NET 8 + Avalonia | `sing-box.exe` (mixed / TUN) | MVP scaffold: UI, импорт, runner |
 
-## Стек
+Общий формат серверов: [`core/docs/server-json.md`](core/docs/server-json.md).
 
-- SwiftUI (iPhone + Mac)
-- `PacketTunnel` Network Extension
-- Libbox (sing-box) — скачивается скриптом, не лежит в git (~350 MB)
-- XcodeGen → `project.yml`
+## Roadmap
+
+### P0 — блокеры реального VPN
+- [x] Apple: Reality (`pbk`/`sid`/`fp`/`flow`), HY2 obfs в builder + ручная форма
+- [x] Apple: секреты в Keychain
+- [x] Apple: без тихого демо‑подключения при ошибке NE
+- [ ] Apple: подпись Network Extension + App Group `group.app.olo.vpn`, e2e на устройстве
+- [ ] Android: подключить собранный `libbox.aar` к `OloVpnService`
+- [ ] Windows: e2e с WinTun / system proxy на реальной машине
+
+### P1 — продукт
+- Живой монитор (Clash API / события Libbox)
+- geoip/geosite rule-set
+- Авто‑refresh подписок
+- Иконки Mac 512@1x/@2x; логи extension в App Group
+
+### P2 — позже
+- Widget / Menu Bar / Control Center
+- App Store vs GPL (вне Store или другой движок)
+
+## Структура репозитория
+
+```
+OloVPN/          Apple UI + сервисы
+PacketTunnel/    Network Extension (Libbox)
+android/         Compose app (Gradle)
+windows/         Avalonia .sln (Olo.Desktop)
+core/docs/       спецификация JSON сервера
+scripts/         fetch Libbox / AAR / sing-box Windows
+```
 
 ## Быстрый старт
 
-```bash
-# 1. Libbox
-./scripts/fetch_libbox.sh
+### Apple
 
-# 2. Xcode‑проект
+```bash
+./scripts/fetch_libbox.sh
 brew install xcodegen   # если ещё нет
 xcodegen generate
 open OloVPN.xcodeproj
 ```
 
-Схемы в Xcode:
+Схемы: **OloVPN** (Mac), **OloVPN-iOS** (iPhone). Нужен Apple Developer: Network Extensions + App Group `group.app.olo.vpn`.
 
-- **OloVPN** — Mac  
-- **OloVPN-iOS** — iPhone  
-
-Нужен [Apple Developer](https://developer.apple.com) ($99/год): capability **Network Extensions** + App Group `group.app.olo.vpn` для:
-
-- `app.olo.vpn`
-- `app.olo.vpn.PacketTunnel`
-
-На симуляторе туннель не поднимается — UI и демо‑монитор работают. Реальный VPN — на устройстве / Mac с подписью.
-
-## Структура
-
-```
-OloVPN/          UI и сервисы приложения
-PacketTunnel/    Network Extension (Libbox)
-Shared/          общие константы (App Group)
-scripts/         fetch_libbox.sh
-project.yml      XcodeGen
-```
-
-## Сборка без подписи (проверка)
+### Android
 
 ```bash
-xcodebuild -scheme OloVPN -destination 'platform=macOS' CODE_SIGNING_ALLOWED=NO build
-xcodebuild -scheme OloVPN-iOS -destination 'platform=iOS Simulator,name=iPhone 18 Pro' CODE_SIGNING_ALLOWED=NO build
+# опционально собрать Libbox AAR:
+./scripts/fetch_libbox_android.sh
+
+cd android
+./gradlew :app:assembleDebug
 ```
 
-## Лицензия и магазин
+Откройте `android/` в Android Studio. Min SDK 26. Без `libbox.aar` поднимается TUN‑заглушка и пишется `sing-box-config.json`.
 
-Проект: **[GPL‑3.0-or-later](LICENSE)** — открытый исходный код, совместимо с sing-box.
+### Windows
 
-App Store и GPL стыкуются плохо: для публикации в Store обычно нужен другой движок или иное право. Сейчас логичный путь — GitHub + TestFlight / прямая установка по Developer ID.
+```bash
+./scripts/fetch_singbox_windows.sh
+cd windows
+dotnet build Olo.sln
+dotnet run --project Olo.Desktop
+```
 
-## Статус
+По умолчанию — mixed proxy `127.0.0.1:7890` (без админа). Опция TUN — с правами администратора и WinTun.
 
-Активная разработка. UI и импорт конфигов готовы; туннель на Libbox подключён в проекте — для продакшена нужна ваша Apple‑подпись и проверка на железе.
+## Возможности (общие)
+
+| | |
+|---|---|
+| **Серверы** | `ss://` · `vless://` · `trojan://` · `hy2://`, https‑подписки, ручная форма |
+| **Маршрут** | Умный / весь трафик; местные домены региона мимо VPN |
+| **Защита** | Kill switch, DNS через VPN, блок IPv6, LAN |
+
+## Лицензия
+
+**[GPL‑3.0-or-later](LICENSE)** — совместимо с sing-box. App Store и GPL стыкуются плохо; логичный путь сейчас — GitHub / TestFlight / прямая установка.
 
 ## Благодарности
 
 - [sing-box](https://github.com/SagerNet/sing-box) — ядро прокси  
-- Открытые клиенты на Libbox — паттерны Packet Tunnel  
+- Открытые клиенты на Libbox — паттерны туннеля  

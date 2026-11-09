@@ -14,3 +14,24 @@ Vendor/Libbox.xcframework/
 Vendor/sing-box/
 Vendor/bin/
 Vendor/*.zip
+
+# Android
+android/.gradle/
+android/local.properties
+android/**/build/
+android/app/libs/*.aar
+*.apk
+*.aab
+
+# Windows / .NET
+windows/**/bin/
+windows/**/obj/
+windows/**/bin-dist/
+windows/Olo.Desktop/bin/
+*.user
+*.suo
+
+# Local secrets
+.env
+*.p12
+*.mobileprovision

@@ -1,0 +1,67 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:Olo.Desktop.ViewModels"
+        x:Class="Olo.Desktop.Views.MainWindow"
+        x:DataType="vm:MainViewModel"
+        Title="Olo"
+        Width="920" Height="640"
+        MinWidth="720" MinHeight="480"
+        Background="#EEF3F6">
+
+  <Grid Margin="28" RowDefinitions="Auto,*,Auto" ColumnDefinitions="*,340">
+    <StackPanel Grid.Row="0" Grid.ColumnSpan="2" Spacing="4">
+      <TextBlock Text="Olo" FontSize="36" FontWeight="Bold" Foreground="#134E4A" />
+      <TextBlock Text="{Binding Status}" Opacity="0.7" Foreground="#134E4A" />
+    </StackPanel>
+
+    <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,24,24,0" Spacing="16">
+      <Button Command="{Binding ToggleConnectCommand}"
+              Width="168" Height="168"
+              HorizontalAlignment="Left"
+              CornerRadius="84"
+              Background="#0D9488"
+              Foreground="White"
+              FontSize="22"
+              FontWeight="SemiBold"
+              Content="{Binding ConnectLabel}" />
+
+      <StackPanel Orientation="Horizontal" Spacing="12">
+        <CheckBox Content="Умный маршрут" IsChecked="{Binding SmartRouting}" />
+        <CheckBox Content="Местное мимо VPN" IsChecked="{Binding BypassLocal}" />
+      </StackPanel>
+
+      <TextBlock Text="Серверы" FontWeight="SemiBold" Foreground="#134E4A" />
+      <ListBox ItemsSource="{Binding Servers}"
+               SelectedItem="{Binding SelectedServer}"
+               MinHeight="220">
+        <ListBox.ItemTemplate>
+          <DataTemplate>
+            <StackPanel Margin="4">
+              <TextBlock Text="{Binding DisplayName}" FontWeight="Medium" />
+              <TextBlock Text="{Binding Endpoint}" Opacity="0.55" FontSize="12" />
+            </StackPanel>
+          </DataTemplate>
+        </ListBox.ItemTemplate>
+      </ListBox>
+      <Button Content="Удалить выбранный" Command="{Binding RemoveSelectedCommand}" />
+    </StackPanel>
+
+    <Border Grid.Row="1" Grid.Column="1" Background="#FFFFFFCC" CornerRadius="16" Padding="16" Margin="0,24,0,0">
+      <StackPanel Spacing="10">
+        <TextBlock Text="Добавить" FontSize="20" FontWeight="Bold" Foreground="#134E4A" />
+        <TextBlock Text="Ссылка или URL подписки" Opacity="0.65" TextWrapping="Wrap" />
+        <TextBox Text="{Binding PasteText}" AcceptsReturn="True" Height="120" TextWrapping="Wrap"
+                 Watermark="vless:// · ss:// · https://…" />
+        <TextBlock Text="{Binding ImportError}" Foreground="#B91C1C" TextWrapping="Wrap" />
+        <Button Content="Импортировать" Command="{Binding ImportCommand}" HorizontalAlignment="Stretch" />
+        <Separator Margin="0,8" />
+        <CheckBox Content="TUN (админ + WinTun)" IsChecked="{Binding PreferTun}" />
+        <TextBlock TextWrapping="Wrap" Opacity="0.65" FontSize="12"
+                   Text="Без TUN: mixed proxy 127.0.0.1:7890. Бинарь: %AppData%/Olo/bin/sing-box.exe" />
+      </StackPanel>
+    </Border>
+
+    <TextBlock Grid.Row="2" Grid.ColumnSpan="2" Margin="0,16,0,0" Opacity="0.5"
+               Text="Windows MVP · Avalonia + sing-box" />
+  </Grid>
+</Window>

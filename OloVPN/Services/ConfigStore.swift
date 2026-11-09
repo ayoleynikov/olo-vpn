@@ -27,7 +27,8 @@ final class ConfigStore: ObservableObject {
     }
 
     var selectedServer: VPNServer? {
-        servers.first { $0.id == selectedID } ?? servers.first
+        guard let base = servers.first(where: { $0.id == selectedID }) ?? servers.first else { return nil }
+        return hydrateSecrets(base)
     }
 
     var routingSummary: String {
@@ -45,18 +46,21 @@ final class ConfigStore: ObservableObject {
     }
 
     func add(_ server: VPNServer) {
-        servers.insert(server, at: 0)
+        KeychainStore.saveSecret(serverID: server.id, password: server.password, uuid: server.uuid)
+        servers.insert(server.redactedForDisk(), at: 0)
         selectedID = server.id
         persist()
     }
 
     func update(_ server: VPNServer) {
         guard let index = servers.firstIndex(where: { $0.id == server.id }) else { return }
-        servers[index] = server
+        KeychainStore.saveSecret(serverID: server.id, password: server.password, uuid: server.uuid)
+        servers[index] = server.redactedForDisk()
         persist()
     }
 
     func delete(_ server: VPNServer) {
+        KeychainStore.deleteSecret(serverID: server.id)
         servers.removeAll { $0.id == server.id }
         if selectedID == server.id {
             selectedID = servers.first?.id
@@ -70,9 +74,12 @@ final class ConfigStore: ObservableObject {
     }
 
     func replaceServers(namedPrefix prefix: String, with newServers: [VPNServer]) {
+        let doomed = servers.filter { $0.name.hasPrefix(prefix) }
+        doomed.forEach { KeychainStore.deleteSecret(serverID: $0.id) }
         servers.removeAll { $0.name.hasPrefix(prefix) }
         for server in newServers.reversed() {
-            servers.insert(server, at: 0)
+            KeychainStore.saveSecret(serverID: server.id, password: server.password, uuid: server.uuid)
+            servers.insert(server.redactedForDisk(), at: 0)
         }
         if selectedID == nil || !servers.contains(where: { $0.id == selectedID }) {
             selectedID = servers.first?.id
@@ -80,35 +87,31 @@ final class ConfigStore: ObservableObject {
         persist()
     }
 
-    /// Legacy UI simulation when tunnel manager is unavailable (simulator / no signing).
-    func simulateToggleConnection() {
-        switch connectionState {
-        case .disconnected:
-            guard selectedServer != nil else { return }
-            connectionState = .connecting
-            Task {
-                try? await Task.sleep(nanoseconds: 900_000_000)
-                connectionState = .connected
-            }
-        case .connected:
-            connectionState = .disconnecting
-            Task {
-                try? await Task.sleep(nanoseconds: 500_000_000)
-                connectionState = .disconnected
-            }
-        case .connecting, .disconnecting:
-            break
-        }
-    }
-
     func applyTunnelStatus(_ state: ConnectionState) {
         connectionState = state
+    }
+
+    func serverForDisplay(_ server: VPNServer) -> VPNServer {
+        hydrateSecrets(server)
+    }
+
+    private func hydrateSecrets(_ server: VPNServer) -> VPNServer {
+        let secret = KeychainStore.loadSecret(serverID: server.id)
+        return server.withSecrets(password: secret.password, uuid: secret.uuid)
     }
 
     private func load() {
         if let data = UserDefaults.standard.data(forKey: serversKey),
            let decoded = try? JSONDecoder().decode([VPNServer].self, from: data) {
-            servers = decoded
+            // Migrate any leftover secrets from older builds into Keychain once.
+            servers = decoded.map { server in
+                if !server.password.isEmpty || !server.uuid.isEmpty {
+                    KeychainStore.saveSecret(serverID: server.id, password: server.password, uuid: server.uuid)
+                    return server.redactedForDisk()
+                }
+                return server
+            }
+            persist()
         }
         if let idString = UserDefaults.standard.string(forKey: selectedKey),
            let id = UUID(uuidString: idString) {

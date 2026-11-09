@@ -55,6 +55,19 @@ struct VPNServer: Identifiable, Codable, Equatable, Hashable {
     var rawLink: String
     var createdAt: Date
 
+    // TLS / Reality / transport extras
+    var security: String
+    var flow: String
+    var fingerprint: String
+    var publicKey: String
+    var shortID: String
+    var spiderX: String
+    var wsPath: String
+    var wsHost: String
+    var grpcServiceName: String
+    var hy2Obfs: String
+    var hy2ObfsPassword: String
+
     init(
         id: UUID = UUID(),
         name: String,
@@ -68,7 +81,18 @@ struct VPNServer: Identifiable, Codable, Equatable, Hashable {
         transport: String = "tcp",
         remark: String = "",
         rawLink: String = "",
-        createdAt: Date = Date()
+        createdAt: Date = Date(),
+        security: String = "",
+        flow: String = "",
+        fingerprint: String = "",
+        publicKey: String = "",
+        shortID: String = "",
+        spiderX: String = "",
+        wsPath: String = "/",
+        wsHost: String = "",
+        grpcServiceName: String = "GunService",
+        hy2Obfs: String = "",
+        hy2ObfsPassword: String = ""
     ) {
         self.id = id
         self.name = name
@@ -83,6 +107,17 @@ struct VPNServer: Identifiable, Codable, Equatable, Hashable {
         self.remark = remark
         self.rawLink = rawLink
         self.createdAt = createdAt
+        self.security = security
+        self.flow = flow
+        self.fingerprint = fingerprint
+        self.publicKey = publicKey
+        self.shortID = shortID
+        self.spiderX = spiderX
+        self.wsPath = wsPath
+        self.wsHost = wsHost
+        self.grpcServiceName = grpcServiceName
+        self.hy2Obfs = hy2Obfs
+        self.hy2ObfsPassword = hy2ObfsPassword
     }
 
     var endpointLabel: String {
@@ -91,6 +126,21 @@ struct VPNServer: Identifiable, Codable, Equatable, Hashable {
 
     var displayName: String {
         name.isEmpty ? endpointLabel : name
+    }
+
+    /// Copy without secrets for UserDefaults persistence.
+    func redactedForDisk() -> VPNServer {
+        var copy = self
+        copy.password = ""
+        copy.uuid = ""
+        return copy
+    }
+
+    func withSecrets(password: String, uuid: String) -> VPNServer {
+        var copy = self
+        if copy.password.isEmpty { copy.password = password }
+        if copy.uuid.isEmpty { copy.uuid = uuid }
+        return copy
     }
 }
 
@@ -110,11 +160,8 @@ enum ConnectionState: Equatable {
     }
 }
 
-/// Как гонять трафик, когда VPN включён.
 enum RouteMode: String, Codable, CaseIterable, Identifiable {
-    /// Местные сайты региона — по правилу ниже; остальное через VPN.
     case smart
-    /// Весь трафик через VPN, без исключений.
     case global
 
     var id: String { rawValue }
@@ -141,7 +188,6 @@ enum RouteMode: String, Codable, CaseIterable, Identifiable {
     }
 }
 
-/// Куда слать сайты «своего» региона в умном режиме.
 enum LocalTrafficPolicy: String, Codable, CaseIterable, Identifiable {
     case bypass
     case throughVPN
@@ -170,7 +216,6 @@ enum LocalTrafficPolicy: String, Codable, CaseIterable, Identifiable {
     }
 }
 
-/// Какой регион считать «местным» для умного маршрута.
 enum LocalRegion: String, Codable, CaseIterable, Identifiable {
     case auto
     case ru

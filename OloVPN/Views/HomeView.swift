@@ -250,19 +250,13 @@ struct HomeView: View {
                     monitor.bind(to: store)
                     try await tunnel.connect(store: store)
                 } catch {
-                    connectError = error.localizedDescription
-                    // Fallback so UI remains usable without paid signing / Libbox on this Mac
-                    #if targetEnvironment(simulator)
-                    store.simulateToggleConnection()
-                    monitor.bind(to: store)
-                    #else
                     store.applyTunnelStatus(.disconnected)
-                    // Still allow demo session for UI polish when NE profile can't start
-                    if (error as? TunnelManager.TunnelError) != nil {
-                        store.simulateToggleConnection()
-                        monitor.bind(to: store)
-                        connectError = "\(error.localizedDescription) · пока демо‑сессия для UI"
-                    }
+                    monitor.bind(to: store)
+                    #if targetEnvironment(simulator)
+                    connectError = "Симулятор не поднимает VPN. Соберите на iPhone/Mac с Developer Team."
+                    #else
+                    connectError = error.localizedDescription
+                        + " Проверьте подпись, Network Extension и App Group group.app.olo.vpn."
                     #endif
                 }
             }
@@ -270,9 +264,8 @@ struct HomeView: View {
             tunnel.disconnect()
             store.applyTunnelStatus(.disconnecting)
             monitor.bind(to: store)
-            // Ensure UI settles if NE doesn't callback (demo)
             Task {
-                try? await Task.sleep(nanoseconds: 600_000_000)
+                try? await Task.sleep(nanoseconds: 1_200_000_000)
                 if store.connectionState == .disconnecting {
                     store.applyTunnelStatus(.disconnected)
                     monitor.bind(to: store)

@@ -1,0 +1,16 @@
+.DS_Store
+DerivedData/
+build/
+*.xcuserstate
+xcuserdata/
+.swiftpm/
+*.moved-aside
+*.pbxuser
+!default.pbxuser
+
+# Huge binaries — fetch with ./scripts/fetch_libbox.sh
+Vendor/Libbox.xcframework.zip
+Vendor/Libbox.xcframework/
+Vendor/sing-box/
+Vendor/bin/
+Vendor/*.zip

@@ -69,18 +69,17 @@ object SingBoxConfigBuilder {
             localRules(localRegion).forEach { rules.put(it) }
         }
 
+        // Legacy DNS schema compatible with sing-box 1.11 release binaries.
         val dnsServers = JSONArray()
         if (protection.dnsThroughVpn) {
             dnsServers.put(
-                JSONObject().put("tag", "remote").put("type", "tls").put("server", "1.1.1.1")
-                    .put("detour", "proxy")
+                JSONObject().put("tag", "remote").put("address", "tls://1.1.1.1").put("detour", "proxy")
             )
             dnsServers.put(
-                JSONObject().put("tag", "local").put("type", "udp").put("server", "8.8.8.8")
-                    .put("detour", "direct")
+                JSONObject().put("tag", "local").put("address", "8.8.8.8").put("detour", "direct")
             )
         } else {
-            dnsServers.put(JSONObject().put("tag", "local").put("type", "udp").put("server", "8.8.8.8"))
+            dnsServers.put(JSONObject().put("tag", "local").put("address", "8.8.8.8"))
         }
 
         val address = JSONArray().put("172.19.0.1/30")
@@ -128,7 +127,7 @@ object SingBoxConfigBuilder {
         }
         if (server.security.equals("reality", true) || server.publicKey.isNotBlank()) {
             val reality = JSONObject().put("enabled", true).put("public_key", server.publicKey)
-            if (server.shortId.isNotBlank()) reality.put("short_id", JSONArray().put(server.shortId))
+            if (server.shortId.isNotBlank()) reality.put("short_id", server.shortId)
             tls.put("reality", reality)
         }
         return tls

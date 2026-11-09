@@ -113,21 +113,22 @@ public static class SingBoxConfigBuilder
             };
         }
 
+        // Legacy DNS schema compatible with sing-box 1.11 release binaries.
         var dnsServers = new JsonArray();
         if (protection.DnsThroughVpn)
         {
             dnsServers.Add(new JsonObject
             {
-                ["tag"] = "remote", ["type"] = "tls", ["server"] = "1.1.1.1", ["detour"] = "proxy"
+                ["tag"] = "remote", ["address"] = "tls://1.1.1.1", ["detour"] = "proxy"
             });
             dnsServers.Add(new JsonObject
             {
-                ["tag"] = "local", ["type"] = "udp", ["server"] = "8.8.8.8", ["detour"] = "direct"
+                ["tag"] = "local", ["address"] = "8.8.8.8", ["detour"] = "direct"
             });
         }
         else
         {
-            dnsServers.Add(new JsonObject { ["tag"] = "local", ["type"] = "udp", ["server"] = "8.8.8.8" });
+            dnsServers.Add(new JsonObject { ["tag"] = "local", ["address"] = "8.8.8.8" });
         }
 
         var config = new JsonObject
@@ -180,7 +181,7 @@ public static class SingBoxConfigBuilder
         {
             var reality = new JsonObject { ["enabled"] = true, ["public_key"] = server.PublicKey };
             if (!string.IsNullOrWhiteSpace(server.ShortId))
-                reality["short_id"] = new JsonArray(server.ShortId);
+                reality["short_id"] = server.ShortId;
             tls["reality"] = reality;
         }
         return tls;

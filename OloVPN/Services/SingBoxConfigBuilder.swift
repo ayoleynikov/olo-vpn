@@ -122,14 +122,15 @@ enum SingBoxConfigBuilder {
             "stack": "system"
         ]
 
+        // Legacy DNS schema (sing-box 1.11 binary): address URL, not typed servers.
         var dnsServers: [[String: Any]] = []
         if protection.dnsThroughVPN {
             dnsServers = [
-                ["tag": "remote", "type": "tls", "server": "1.1.1.1", "detour": "proxy"],
-                ["tag": "local", "type": "udp", "server": "8.8.8.8", "detour": "direct"]
+                ["tag": "remote", "address": "tls://1.1.1.1", "detour": "proxy"],
+                ["tag": "local", "address": "8.8.8.8", "detour": "direct"]
             ]
         } else {
-            dnsServers = [["tag": "local", "type": "udp", "server": "8.8.8.8"]]
+            dnsServers = [["tag": "local", "address": "8.8.8.8"]]
         }
 
         let config: [String: Any] = [
@@ -200,7 +201,7 @@ enum SingBoxConfigBuilder {
                 "public_key": server.publicKey
             ]
             if !server.shortID.isEmpty {
-                reality["short_id"] = [server.shortID]
+                reality["short_id"] = server.shortID
             }
             tls["reality"] = reality
         }

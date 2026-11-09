@@ -59,4 +59,7 @@ dependencies {
     // Optional: run scripts/fetch_libbox_android.sh then drop libbox.aar here
     implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.aar"))))
     debugImplementation("androidx.compose.ui:ui-tooling")
+    testImplementation("junit:junit:4.13.2")
+    testImplementation("org.robolectric:robolectric:4.14.1")
+    testImplementation("org.json:json:20240303")
 }

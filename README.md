@@ -79,11 +79,19 @@ cd android
 ```bash
 ./scripts/fetch_singbox_windows.sh
 cd windows
-dotnet build Olo.sln
+dotnet build Olo.sln   # .NET 8+ / 10 SDK
 dotnet run --project Olo.Desktop
 ```
 
 По умолчанию — mixed proxy `127.0.0.1:7890` (без админа). Опция TUN — с правами администратора и WinTun.
+
+### Автотесты
+
+```bash
+./scripts/run_vpn_tests.sh
+```
+
+Проверяет: unit‑тесты парсеров/builder (Windows + Android), `sing-box check` + живой smoke через local mixed→direct proxy, сборку Apple macOS. Полный e2e туннель с вашей нодой — отдельно (подпись / Libbox / WinTun).
 
 ## Возможности (общие)
 

@@ -23,6 +23,8 @@ public sealed class VpnServer
     public string PublicKey { get; set; } = "";
     public string ShortId { get; set; } = "";
     public string WsPath { get; set; } = "/";
+    public string WsHost { get; set; } = "";
+    public string GrpcServiceName { get; set; } = "GunService";
     public string Hy2Obfs { get; set; } = "";
     public string Hy2ObfsPassword { get; set; } = "";
     public string RawLink { get; set; } = "";

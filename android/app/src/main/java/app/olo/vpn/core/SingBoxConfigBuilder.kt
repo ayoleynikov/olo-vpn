@@ -34,8 +34,13 @@ object SingBoxConfigBuilder {
                 }
                 outbound.put("tls", tls(server))
             }
-            ProxyProto.trojan -> outbound.put("server", server.host).put("server_port", server.port)
-                .put("password", server.password).put("tls", tls(server))
+            ProxyProto.trojan -> {
+                outbound.put("server", server.host).put("server_port", server.port)
+                    .put("password", server.password).put("tls", tls(server))
+                if (server.transport.isNotBlank() && server.transport != "tcp") {
+                    outbound.put("transport", transport(server))
+                }
+            }
             ProxyProto.hysteria2 -> {
                 outbound.put("server", server.host).put("server_port", server.port)
                     .put("password", server.password.ifBlank { server.uuid })
@@ -53,10 +58,21 @@ object SingBoxConfigBuilder {
                 if (server.transport.isNotBlank() && server.transport != "tcp") {
                     outbound.put("transport", transport(server))
                 }
-                outbound.put("tls", tls(server))
+                if (server.security.isNotBlank() || server.sni.isNotBlank()) {
+                    outbound.put("tls", tls(server))
+                }
             }
-            else -> outbound.put("server", server.host).put("server_port", server.port)
-                .put("password", server.password)
+            ProxyProto.tuic -> outbound.put("server", server.host).put("server_port", server.port)
+                .put("uuid", server.uuid).put("password", server.password)
+                .put("congestion_control", "bbr").put("tls", tls(server))
+            ProxyProto.socks, ProxyProto.http -> {
+                outbound.put("server", server.host).put("server_port", server.port)
+                if (server.uuid.isNotBlank()) outbound.put("username", server.uuid)
+                if (server.password.isNotBlank()) outbound.put("password", server.password)
+            }
+            ProxyProto.wireguard -> outbound.put("server", server.host).put("server_port", server.port)
+                .put("private_key", server.password).put("peer_public_key", server.uuid)
+                .put("local_address", JSONArray().put(server.method.ifBlank { "10.0.0.2/32" }))
         }
 
         val rules = JSONArray()
@@ -134,8 +150,15 @@ object SingBoxConfigBuilder {
     }
 
     private fun transport(server: VpnServer): JSONObject = when (server.transport.lowercase()) {
-        "ws", "websocket" -> JSONObject().put("type", "ws").put("path", server.wsPath.ifBlank { "/" })
-        "grpc" -> JSONObject().put("type", "grpc").put("service_name", "GunService")
+        "ws", "websocket" -> {
+            val ws = JSONObject().put("type", "ws").put("path", server.wsPath.ifBlank { "/" })
+            if (server.wsHost.isNotBlank()) {
+                ws.put("headers", JSONObject().put("Host", server.wsHost))
+            }
+            ws
+        }
+        "grpc" -> JSONObject().put("type", "grpc")
+            .put("service_name", server.grpcServiceName.ifBlank { "GunService" })
         else -> JSONObject().put("type", server.transport)
     }
 

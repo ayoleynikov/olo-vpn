@@ -1,6 +1,7 @@
 package app.olo.vpn
 
 import app.olo.vpn.core.LinkParser
+import app.olo.vpn.core.SubscriptionImporter
 import app.olo.vpn.model.ProxyProto
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -72,5 +73,21 @@ class LinkParserTest {
         } catch (e: IllegalArgumentException) {
             // ok
         }
+    }
+
+    @Test
+    fun parseTuicHttpWgAndMany() {
+        val tuic = LinkParser.parse("tuic://11111111-2222-3333-4444-555555555555:pass@tuic.example:443?sni=tuic.example#T")
+        assertEquals(ProxyProto.tuic, tuic.proto)
+        val http = LinkParser.parse("http://u:p@proxy.example:8080#H")
+        assertEquals(ProxyProto.http, http.proto)
+        val wg = LinkParser.parse("wg://PRIVATEKEY@wg.example:51820?publickey=PUB#W")
+        assertEquals(ProxyProto.wireguard, wg.proto)
+        val many = LinkParser.parseMany(
+            "trojan://secret@host.example:8443?sni=host.example#T1\nhy2://pass@hy2.example:443?sni=hy2.example#H"
+        )
+        assertEquals(2, many.size)
+        assertTrue(!SubscriptionImporter.isSubscriptionUrl("http://u:p@proxy.example:8080"))
+        assertTrue(SubscriptionImporter.isSubscriptionUrl("https://example.com/sub#MySub"))
     }
 }

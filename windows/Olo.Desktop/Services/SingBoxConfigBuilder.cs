@@ -42,6 +42,8 @@ public static class SingBoxConfigBuilder
                 outbound["server_port"] = server.Port;
                 outbound["password"] = server.Password;
                 outbound["tls"] = Tls(server);
+                if (!string.IsNullOrWhiteSpace(server.Transport) && server.Transport != "tcp")
+                    outbound["transport"] = Transport(server);
                 break;
             case ProxyProto.hysteria2:
                 outbound["server"] = server.Host;
@@ -64,7 +66,31 @@ public static class SingBoxConfigBuilder
                 outbound["security"] = string.IsNullOrWhiteSpace(server.Method) ? "auto" : server.Method;
                 if (!string.IsNullOrWhiteSpace(server.Transport) && server.Transport != "tcp")
                     outbound["transport"] = Transport(server);
+                if (!string.IsNullOrWhiteSpace(server.Security) || !string.IsNullOrWhiteSpace(server.Sni))
+                    outbound["tls"] = Tls(server);
+                break;
+            case ProxyProto.tuic:
+                outbound["server"] = server.Host;
+                outbound["server_port"] = server.Port;
+                outbound["uuid"] = server.Uuid;
+                outbound["password"] = server.Password;
+                outbound["congestion_control"] = "bbr";
                 outbound["tls"] = Tls(server);
+                break;
+            case ProxyProto.socks:
+            case ProxyProto.http:
+                outbound["server"] = server.Host;
+                outbound["server_port"] = server.Port;
+                if (!string.IsNullOrWhiteSpace(server.Uuid)) outbound["username"] = server.Uuid;
+                if (!string.IsNullOrWhiteSpace(server.Password)) outbound["password"] = server.Password;
+                break;
+            case ProxyProto.wireguard:
+                outbound["server"] = server.Host;
+                outbound["server_port"] = server.Port;
+                outbound["private_key"] = server.Password;
+                outbound["peer_public_key"] = server.Uuid;
+                outbound["local_address"] = new JsonArray(
+                    string.IsNullOrWhiteSpace(server.Method) ? "10.0.0.2/32" : server.Method);
                 break;
             default:
                 outbound["server"] = server.Host;
@@ -190,10 +216,26 @@ public static class SingBoxConfigBuilder
     private static JsonObject Transport(VpnServer server) =>
         server.Transport.ToLowerInvariant() switch
         {
-            "ws" or "websocket" => new JsonObject { ["type"] = "ws", ["path"] = string.IsNullOrWhiteSpace(server.WsPath) ? "/" : server.WsPath },
-            "grpc" => new JsonObject { ["type"] = "grpc", ["service_name"] = "GunService" },
+            "ws" or "websocket" => BuildWs(server),
+            "grpc" => new JsonObject
+            {
+                ["type"] = "grpc",
+                ["service_name"] = string.IsNullOrWhiteSpace(server.GrpcServiceName) ? "GunService" : server.GrpcServiceName
+            },
             _ => new JsonObject { ["type"] = server.Transport }
         };
+
+    private static JsonObject BuildWs(VpnServer server)
+    {
+        var ws = new JsonObject
+        {
+            ["type"] = "ws",
+            ["path"] = string.IsNullOrWhiteSpace(server.WsPath) ? "/" : server.WsPath
+        };
+        if (!string.IsNullOrWhiteSpace(server.WsHost))
+            ws["headers"] = new JsonObject { ["Host"] = server.WsHost };
+        return ws;
+    }
 
     private static IEnumerable<JsonObject> LocalRules(LocalRegion region)
     {

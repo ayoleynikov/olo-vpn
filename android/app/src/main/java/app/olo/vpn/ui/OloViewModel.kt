@@ -109,7 +109,9 @@ class OloViewModel(app: Application) : AndroidViewModel(app) {
                     }
                     store.upsertAll(items)
                 } else {
-                    store.upsert(LinkParser.parse(text))
+                    val many = LinkParser.parseMany(text)
+                    if (many.isNotEmpty()) store.upsertAll(many)
+                    else store.upsert(LinkParser.parse(text))
                 }
                 refresh()
             } catch (e: Exception) {

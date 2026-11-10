@@ -51,7 +51,7 @@
         <TextBlock Text="Добавить" FontSize="20" FontWeight="Bold" Foreground="#134E4A" />
         <TextBlock Text="Ссылка или URL подписки" Opacity="0.65" TextWrapping="Wrap" />
         <TextBox Text="{Binding PasteText}" AcceptsReturn="True" Height="120" TextWrapping="Wrap"
-                 Watermark="vless:// · ss:// · https://…" />
+                 Watermark="любые ссылки пачкой · ss/vless/trojan/hy2/tuic/socks/wg · https://подписка" />
         <TextBlock Text="{Binding ImportError}" Foreground="#B91C1C" TextWrapping="Wrap" />
         <Button Content="Импортировать" Command="{Binding ImportCommand}" HorizontalAlignment="Stretch" />
         <Separator Margin="0,8" />

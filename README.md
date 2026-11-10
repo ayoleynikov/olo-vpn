@@ -97,7 +97,7 @@ dotnet run --project Olo.Desktop
 
 | | |
 |---|---|
-| **Серверы** | `ss://` · `vless://` · `trojan://` · `hy2://`, https‑подписки, ручная форма |
+| **Серверы** | Универсальный импорт: `ss` · `vmess` · `vless` · `trojan` · `hy2` · `tuic` · `socks` · `wg` · HTTP‑proxy; пачка ссылок; https‑подписки (URI / Clash JSON / sing-box JSON) |
 | **Маршрут** | Умный / весь трафик; местные домены региона мимо VPN |
 | **Защита** | Kill switch, DNS через VPN, блок IPv6, LAN |
 

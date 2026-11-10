@@ -50,12 +50,12 @@ fun AddScreen(vm: OloViewModel) {
         verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
         Text("Добавить", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold, color = Ink)
-        Text("Вставьте ссылку или URL подписки", color = Ink.copy(alpha = 0.65f))
+        Text("Любые ссылки (можно пачкой) или https-подписка", color = Ink.copy(alpha = 0.65f))
         OutlinedTextField(
             value = paste,
             onValueChange = { paste = it },
             modifier = Modifier.fillMaxWidth().height(120.dp),
-            label = { Text("ss:// · vless:// · trojan:// · hy2:// · https://…") }
+            label = { Text("ss · vmess · vless · trojan · hy2 · tuic · socks · wg · https://…") }
         )
         if (vm.importBusy) CircularProgressIndicator()
         vm.importError?.let { Text(it, color = MaterialTheme.colorScheme.error) }

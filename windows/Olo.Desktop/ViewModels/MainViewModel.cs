@@ -108,7 +108,9 @@ public partial class MainViewModel : ObservableObject
             }
             else
             {
-                Servers.Add(LinkParser.Parse(raw));
+                var many = LinkParser.ParseMany(raw);
+                if (many.Count > 0) foreach (var item in many) Servers.Add(item);
+                else Servers.Add(LinkParser.Parse(raw));
             }
             SelectedServer ??= Servers.LastOrDefault();
             Persist();

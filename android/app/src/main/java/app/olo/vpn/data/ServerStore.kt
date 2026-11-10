@@ -83,7 +83,9 @@ class ServerStore(context: Context) {
         .put("transport", s.transport).put("security", s.security)
         .put("flow", s.flow).put("fingerprint", s.fingerprint)
         .put("publicKey", s.publicKey).put("shortId", s.shortId)
-        .put("wsPath", s.wsPath).put("hy2Obfs", s.hy2Obfs)
+        .put("wsPath", s.wsPath).put("wsHost", s.wsHost)
+        .put("grpcServiceName", s.grpcServiceName)
+        .put("hy2Obfs", s.hy2Obfs)
         .put("hy2ObfsPassword", s.hy2ObfsPassword).put("rawLink", s.rawLink)
 
     private fun decode(o: JSONObject) = VpnServer(
@@ -103,6 +105,8 @@ class ServerStore(context: Context) {
         publicKey = o.optString("publicKey"),
         shortId = o.optString("shortId"),
         wsPath = o.optString("wsPath", "/"),
+        wsHost = o.optString("wsHost"),
+        grpcServiceName = o.optString("grpcServiceName", "GunService"),
         hy2Obfs = o.optString("hy2Obfs"),
         hy2ObfsPassword = o.optString("hy2ObfsPassword"),
         rawLink = o.optString("rawLink")

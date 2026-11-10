@@ -19,6 +19,10 @@ enum SubscriptionImporter {
         let trimmed = raw.trimmingCharacters(in: .whitespacesAndNewlines)
         let lower = trimmed.lowercased()
         guard lower.hasPrefix("http://") || lower.hasPrefix("https://") else { return false }
+        // `http://user:pass@host:port` is an HTTP proxy node, not a subscription list.
+        if let at = trimmed.firstIndex(of: "@"), trimmed[..<at].contains("://") {
+            return false
+        }
         return true
     }
 
@@ -52,29 +56,32 @@ enum SubscriptionImporter {
         let decoded = decodeSubscriptionBody(text)
         let prefix = namePrefix?.trimmingCharacters(in: .whitespacesAndNewlines)
 
-        // Links may be separated by newlines OR appear inline after decode
-        var chunks = decoded
-            .components(separatedBy: .newlines)
-            .flatMap { $0.components(separatedBy: "\r") }
-            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
-            .filter { !$0.isEmpty && !$0.hasPrefix("#") }
+        var servers: [VPNServer] = []
 
-        // Fallback: split on scheme boundaries if still one blob
-        if chunks.count == 1, let only = chunks.first, only.contains("://") {
-            let split = splitProxyLinks(only)
-            if split.count > 1 {
-                chunks = split
+        // Clash / sing-box JSON profiles
+        if let fromJSON = parseJSONProfile(decoded) {
+            servers.append(contentsOf: fromJSON)
+        }
+
+        // URI list (Shadowrocket-style)
+        if servers.isEmpty {
+            servers = LinkParser.parseMany(decoded)
+        } else {
+            // Also merge any inline URIs present alongside JSON
+            for extra in LinkParser.parseMany(decoded) {
+                if !servers.contains(where: {
+                    $0.host == extra.host && $0.port == extra.port && $0.proto == extra.proto
+                }) {
+                    servers.append(extra)
+                }
             }
         }
 
-        var servers: [VPNServer] = []
-        for line in chunks {
-            if var server = try? LinkParser.parse(line) {
-                if let prefix, !prefix.isEmpty,
-                   server.name.isEmpty || server.name == server.proto.title || server.name.count > 80 {
-                    server.name = "\(prefix) · \(server.endpointLabel)"
+        if let prefix, !prefix.isEmpty {
+            for i in servers.indices {
+                if servers[i].name.isEmpty || servers[i].name == servers[i].proto.title || servers[i].name.count > 80 {
+                    servers[i].name = "\(prefix) · \(servers[i].endpointLabel)"
                 }
-                servers.append(server)
             }
         }
 
@@ -82,6 +89,121 @@ enum SubscriptionImporter {
             throw SubscriptionImportError.noServers
         }
         return servers
+    }
+
+    /// Clash Meta `{"proxies":[…]}` or sing-box `{"outbounds":[…]}`.
+    private static func parseJSONProfile(_ text: String) -> [VPNServer]? {
+        let stripped = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard stripped.hasPrefix("{") || stripped.hasPrefix("[") else { return nil }
+        guard let data = stripped.data(using: .utf8),
+              let root = try? JSONSerialization.jsonObject(with: data) else {
+            return nil
+        }
+
+        var nodes: [[String: Any]] = []
+        if let dict = root as? [String: Any] {
+            if let proxies = dict["proxies"] as? [[String: Any]] {
+                nodes = proxies
+            } else if let outbounds = dict["outbounds"] as? [[String: Any]] {
+                nodes = outbounds.filter { item in
+                    let type = (item["type"] as? String)?.lowercased() ?? ""
+                    return !["direct", "block", "dns", "selector", "urltest", "relay"].contains(type)
+                }
+            }
+        } else if let array = root as? [[String: Any]] {
+            nodes = array
+        }
+        guard !nodes.isEmpty else { return nil }
+
+        var servers: [VPNServer] = []
+        for node in nodes {
+            if let server = mapClashOrSingNode(node) {
+                servers.append(server)
+            }
+        }
+        return servers.isEmpty ? nil : servers
+    }
+
+    private static func mapClashOrSingNode(_ node: [String: Any]) -> VPNServer? {
+        let type = ((node["type"] as? String) ?? "").lowercased()
+        let name = (node["name"] as? String) ?? (node["tag"] as? String) ?? type.uppercased()
+        let host = (node["server"] as? String) ?? ""
+        let port: Int = {
+            if let p = node["server_port"] as? Int { return p }
+            if let p = node["port"] as? Int { return p }
+            if let s = node["port"] as? String, let p = Int(s) { return p }
+            return 0
+        }()
+        guard !host.isEmpty, port > 0 else { return nil }
+
+        switch type {
+        case "ss", "shadowsocks":
+            return VPNServer(
+                name: name, proto: .shadowsocks, host: host, port: port,
+                password: node["password"] as? String ?? "",
+                method: (node["cipher"] as? String) ?? (node["method"] as? String) ?? "aes-256-gcm"
+            )
+        case "vmess":
+            return VPNServer(
+                name: name, proto: .vmess, host: host, port: port,
+                uuid: (node["uuid"] as? String) ?? "",
+                method: (node["cipher"] as? String) ?? (node["security"] as? String) ?? "auto",
+                sni: (node["servername"] as? String) ?? (node["sni"] as? String) ?? host,
+                transport: (node["network"] as? String) ?? (node["transport"] as? [String: Any]).flatMap { $0["type"] as? String } ?? "tcp"
+            )
+        case "vless":
+            return VPNServer(
+                name: name, proto: .vless, host: host, port: port,
+                uuid: (node["uuid"] as? String) ?? "",
+                sni: (node["servername"] as? String) ?? (node["tls"] as? [String: Any]).flatMap { $0["server_name"] as? String } ?? host,
+                transport: (node["network"] as? String) ?? "tcp",
+                security: ((node["reality-opts"] as? [String: Any]) != nil) ? "reality" : ((node["tls"] as? Bool) == true || node["tls"] is [String: Any] ? "tls" : ""),
+                flow: node["flow"] as? String ?? "",
+                publicKey: (node["reality-opts"] as? [String: Any])?["public-key"] as? String
+                    ?? (node["tls"] as? [String: Any]).flatMap { ($0["reality"] as? [String: Any])?["public_key"] as? String } ?? "",
+                shortID: (node["reality-opts"] as? [String: Any])?["short-id"] as? String
+                    ?? (node["tls"] as? [String: Any]).flatMap { ($0["reality"] as? [String: Any])?["short_id"] as? String } ?? ""
+            )
+        case "trojan":
+            return VPNServer(
+                name: name, proto: .trojan, host: host, port: port,
+                password: node["password"] as? String ?? "",
+                sni: (node["sni"] as? String) ?? host
+            )
+        case "hysteria2", "hy2":
+            return VPNServer(
+                name: name, proto: .hysteria2, host: host, port: port,
+                password: (node["password"] as? String) ?? (node["auth"] as? String) ?? "",
+                sni: (node["sni"] as? String) ?? host
+            )
+        case "tuic":
+            return VPNServer(
+                name: name, proto: .tuic, host: host, port: port,
+                password: node["password"] as? String ?? "",
+                uuid: (node["uuid"] as? String) ?? "",
+                sni: (node["sni"] as? String) ?? host
+            )
+        case "socks", "socks5":
+            return VPNServer(
+                name: name, proto: .socks, host: host, port: port,
+                password: node["password"] as? String ?? "",
+                uuid: (node["username"] as? String) ?? ""
+            )
+        case "http":
+            return VPNServer(
+                name: name, proto: .http, host: host, port: port,
+                password: node["password"] as? String ?? "",
+                uuid: (node["username"] as? String) ?? ""
+            )
+        case "wireguard":
+            return VPNServer(
+                name: name, proto: .wireguard, host: host, port: port,
+                password: (node["private-key"] as? String) ?? (node["private_key"] as? String) ?? "",
+                uuid: (node["public-key"] as? String) ?? (node["peer_public_key"] as? String) ?? ""
+            )
+        default:
+            return nil
+        }
     }
 
     static func remark(from rawURL: String) -> String? {
@@ -93,11 +215,20 @@ enum SubscriptionImporter {
     /// Shadowrocket-style bodies are often one long base64 line without padding.
     private static func decodeSubscriptionBody(_ text: String) -> String {
         let stripped = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        let lower = stripped.lowercased()
         if stripped.contains("://"),
-           stripped.lowercased().contains("ss://")
-            || stripped.lowercased().contains("vless://")
-            || stripped.lowercased().contains("vmess://")
-            || stripped.lowercased().contains("trojan://") {
+           lower.contains("ss://")
+            || lower.contains("vless://")
+            || lower.contains("vmess://")
+            || lower.contains("trojan://")
+            || lower.contains("hy2://")
+            || lower.contains("hysteria")
+            || lower.contains("tuic://")
+            || lower.contains("socks")
+            || lower.contains("wireguard://") {
+            return stripped
+        }
+        if stripped.hasPrefix("{") || stripped.hasPrefix("[") {
             return stripped
         }
 

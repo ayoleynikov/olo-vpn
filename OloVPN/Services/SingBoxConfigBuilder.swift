@@ -92,7 +92,7 @@ enum SingBoxConfigBuilder {
             outbound["server_port"] = server.port
             outbound["private_key"] = server.password
             outbound["peer_public_key"] = server.uuid
-            outbound["local_address"] = ["10.0.0.2/32"]
+            outbound["local_address"] = [server.method.isEmpty ? "10.0.0.2/32" : server.method]
         }
 
         var routeRules: [[String: Any]] = [

@@ -27,7 +27,7 @@ struct PasteLinkView: View {
                         .font(.system(size: 22, weight: .bold, design: .rounded))
                         .foregroundStyle(OloTheme.ink)
 
-                    Text("Подойдёт ss:// · vless:// · trojan:// или https:// подписка (как в Shadowrocket).")
+                    Text("Любые ссылки: ss · vmess · vless · trojan · hy2 · tuic · socks · wg · http-proxy. Несколько сразу или https:// подписка.")
                         .font(OloTheme.captionFont)
                         .foregroundStyle(OloTheme.inkSoft)
 
@@ -187,11 +187,21 @@ struct PasteLinkView: View {
 
         if SubscriptionImporter.isSubscriptionURL(trimmed) {
             let remark = SubscriptionImporter.remark(from: trimmed)
-            hintText = "Это подписка Shadowrocket (https). Нажмите «Загрузить подписку»."
+            hintText = "Это подписка (https). Нажмите «Загрузить подписку»."
                 + (remark.map { " Имя: \($0)" } ?? "")
             return
         }
 
+        let many = LinkParser.parseMany(trimmed)
+        if many.count > 1 {
+            subscriptionPreview = many
+            hintText = "Найдено ссылок: \(many.count) — можно добавить все"
+            return
+        }
+        if let only = many.first {
+            preview = only
+            return
+        }
         do {
             preview = try LinkParser.parse(trimmed)
         } catch {

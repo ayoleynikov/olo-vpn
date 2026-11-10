@@ -35,6 +35,8 @@ data class VpnServer(
     var publicKey: String = "",
     var shortId: String = "",
     var wsPath: String = "/",
+    var wsHost: String = "",
+    var grpcServiceName: String = "GunService",
     var hy2Obfs: String = "",
     var hy2ObfsPassword: String = "",
     var rawLink: String = ""

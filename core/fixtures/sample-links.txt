@@ -1,0 +1,9 @@
+# Sample share links for cross-platform import tests (fake credentials)
+ss://aes-256-gcm:password@ss.example:8388#SS
+vless://11111111-2222-3333-4444-555555555555@example.com:443?encryption=none&flow=xtls-rprx-vision&security=reality&sni=www.cloudflare.com&fp=chrome&pbk=AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8&sid=abcd&type=tcp#Reality
+trojan://secret@host.example:8443?sni=host.example&type=ws&path=/trojan&host=host.example#TrojanWS
+hy2://pass@hy2.example:443?sni=hy2.example&obfs=salamander&obfs-password=obfs#HY2
+tuic://11111111-2222-3333-4444-555555555555:pass@tuic.example:443?sni=tuic.example#TUIC
+socks5://user:secret@socks.example:1080#SOCKS
+http://u:p@proxy.example:8080#HTTP
+wg://PRIVATEKEY@wg.example:51820?publickey=PUBKEY&address=10.0.0.2/32#WG
